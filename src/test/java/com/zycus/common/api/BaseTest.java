@@ -5,15 +5,15 @@ import io.restassured.specification.ResponseSpecification;
 
 public class BaseTest
 {
-  static	RequestSpecification reqSpec;
-  static	ResponseSpecification resSpec;
+ protected static RequestSpecification requestSpecification;
+ protected static ResponseSpecification responseSpecification;
 	public static void initialize(String testName,String testDescription) throws Exception
 	{
 		try
 		{
 			Report.startExtentReport(testName, testDescription);
-			reqSpec=RestUtilities.getRequestSpecification();
-			resSpec=RestUtilities.getResponseSpecification();
+			requestSpecification=RestUtilities.getRequestSpecification();
+			responseSpecification=RestUtilities.getResponseSpecification();
 		}
 		catch (Exception e) 
 		{

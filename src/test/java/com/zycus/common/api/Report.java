@@ -9,9 +9,6 @@ import com.relevantcodes.extentreports.LogStatus;
 public class Report
 {
 
-    
-	
-	
 	private static String resultPath=getResultPath();
 	private static String file_name="/ExtentReports.html";
 	private static  ExtentReports extentReport;
@@ -28,12 +25,12 @@ public class Report
 		return resultPath;
 	}
 	
-	public static void startExtentReport(String testCaseName,String description,String...categories)
+	public static void startExtentReport(String testCaseName,String description)
 	{
 		testName=testCaseName;
 		extentReport=new ExtentReports(resultPath+file_name,false);
 		extentReport.addSystemInfo("Host", "Local").addSystemInfo("Env", "Cloud");
-		looger=extentReport.startTest(testCaseName, description).assignCategory(categories);
+		looger=extentReport.startTest(testCaseName, description);
 		
 	}
 	public static void endReport()
