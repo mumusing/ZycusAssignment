@@ -6,15 +6,21 @@ import org.apache.http.client.methods.RequestBuilder;
 
 import com.zycus.constants.AuthTokens;
 import com.zycus.constants.Path;
+import com.zycus.custom.exceptions.ActionNotSupportedException;
 
 import groovyjarjarantlr.LexerSharedInputState;
 import io.restassured.RestAssured;
 import io.restassured.authentication.AuthenticationScheme;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import static org.hamcrest.Matchers.lessThan;
+import static io.restassured.RestAssured.given;
+
 
 public class RestUtilities {
 	public static String endPoint;
@@ -70,11 +76,68 @@ public class RestUtilities {
 	public static RequestSpecification createPathParam(RequestSpecification requesSpec, String path, String value) {
 		return requesSpec.pathParam(path, value);
 	}
+    /*
+     * This Method return the the response object for given response
+     */
+	public static Response getResponse()
+	{
+		if (endPoint==null) 
+		{
+			return null;
+		}
+		return given().get(endPoint);
+	}
+	
+	/*
+	 * This method return the the response object based on request type
+	 * 
+	 */
+	public static Response getResponse(RequestSpecification request,RequestType type)
+	{
+		requestSpecification=request.spec(request);
+		Response response=null;
+		switch (type) {
+		case GET:
+			response=given().spec(requestSpecification).get(endPoint);
+			break;
+			
+        case POST:
+			response=given().spec(requestSpecification).post(endPoint);
+			break;	
+			
+        case PUT:
+			response=given().spec(requestSpecification).put(endPoint);
+			break;	
+		
+        case DELETE:
+        	response=given().spec(requestSpecification).delete(endPoint);
+			break;	
 
+		default:
+			throw new ActionNotSupportedException("Not valid Exception");
+		}
+		//Log response
+		response.then().log().all();
+		//Verify for common validation
+		response.then().specification(response_specification);
+		return response;
+	}
+	/*
+	 * This method gets JSON path OBJECT for given response
+	 */
+	public static JsonPath getJsonPath(Response response)
+	{
+		if (response==null) 
+		{
+			return null;
+		}
+		String jsonPath=response.asString();
+		return new JsonPath(jsonPath);
+	}
 	
-	
-	
-	
-	
+	public static void setContentType(ContentType type)
+	{
+		given().contentType(type);
+	}
 	
 }
