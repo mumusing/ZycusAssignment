@@ -29,7 +29,7 @@ import static io.restassured.RestAssured.given;
 //This important to mention here. As Before start of test case Listener will get fired which will trigger Initialize method in Base Test.
 @Listeners(Listener.class)
 
-public class AssignmentTest extends BaseTest {
+public class AssignmentTestSuite extends BaseTest {
 	String customerId = "";
 
 	@Test(description = "This method send post request and create customer and validate status code 200")

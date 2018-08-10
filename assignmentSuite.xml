@@ -2,7 +2,7 @@
 <suite name="AssignmentSuite">
       <test name="AssignmentTest">
        <classes>   
-           <class name="com.zycus.testSuites.AssignmentTest"></class>   
+           <class name="com.zycus.testSuites.AssignmentTestSuite"></class>   
        </classes>     
       </test>
       
