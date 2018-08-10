@@ -20,6 +20,10 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+import java.util.concurrent.TimeUnit;
+
 import static io.restassured.RestAssured.given;
 
 //This important to mention here. As Before start of test case Listener will get fired which will trigger Initialize method in Base Test.
@@ -63,10 +67,18 @@ public class AssignmentTest extends BaseTest {
 	@Test(description = "This method get the data about the customer using customer Id")
 	public void getCustomerDetail() {
 		try {
-			Response response = given().spec(RestUtilities.createPathParam(requestSpecification, customerId, "id"))
-					.when().post(EndPoints.GET_CUSTOMER).then().statusCode(200).contentType(ContentType.JSON).and()
-					.body("status", equalTo("OK")).body("name", equalTo("mukesh"))
-					.body("email", equalTo("test@test.com")).body("phone_number", equalTo("1234567")).extract()
+			        Response response = given()
+					 .spec(RestUtilities.createPathParam(requestSpecification, customerId, "id"))
+					.when().get(EndPoints.GET_CUSTOMER)
+					.then()
+					.statusCode(200)
+					.contentType(ContentType.JSON)
+					.and()
+					.body("status", equalTo("OK"))
+					.body("name", equalTo("mukesh"))
+					.body("email", equalTo("test@test.com"))
+					.body("phone_number", equalTo("1234567"))
+					.extract()
 					.response();
 
 			JsonPath jPath = RestUtilities.getJsonPath(response);
@@ -94,12 +106,16 @@ public class AssignmentTest extends BaseTest {
 
 			requestSpecification.basePath(Path.BASE_PATH_CREATE_CUSTOMER);
 
-			Response response = given().spec(requestSpecification).body(custmoerInfo).when()
-					.post(EndPoints.CREATE_CUSTOMER).then().statusCode(400).extract().response();
+			        given()
+					.spec(requestSpecification)
+					.body(custmoerInfo)
+					.when()
+					.post(EndPoints.CREATE_CUSTOMER)
+					.then()
+					.log()
+					.ifError()
+					.statusCode(400);
 
-			Report.log(Status.INFO, response.asString());
-			JsonPath jPath = RestUtilities.getJsonPath(response);
-			Report.log(Status.PASS, "Status code generated with: " + jPath.getString("statusCode"));
 		} catch (Exception e) {
 			// TODO: handle exception
 			Report.log(Status.FAIL, "Failed Because of exception: " + e.getMessage());
@@ -126,13 +142,12 @@ public class AssignmentTest extends BaseTest {
 			custmoerInfo.setLanguage("English");
 			custmoerInfo.setEmail("test@test.com");
 
-			Response response = given().spec(requestSpecification).body(custmoerInfo).when()
-					.post(EndPoints.CREATE_CUSTOMER).then().statusCode(401).extract().response();
-
-			Report.log(Status.INFO, response.asString());
-			JsonPath jPath = RestUtilities.getJsonPath(response);
-			Report.log(Status.PASS, "Status code generated with: " + jPath.getString("statusCode"));
-
+			        given().spec(requestSpecification).body(custmoerInfo).when()
+					.post(EndPoints.CREATE_CUSTOMER)
+					.then()
+					.log()
+					.ifError()
+					.statusCode(401);
 		} catch (Exception e) {
 			// TODO: handle exception
 			Report.log(Status.FAIL, "Failed Because of exception: " + e.getMessage());
@@ -140,4 +155,55 @@ public class AssignmentTest extends BaseTest {
 
 	}
 
+	@Test(description="This method send wrong url and Validate 404 Not found")
+	public void	Validate_404_Not_found()
+	{
+		
+		try 
+		{
+			//Add wrong url 
+			requestSpecification.basePath("http://wrongurl.com");
+
+			          given()
+					 .spec(RestUtilities.createPathParam(requestSpecification, customerId, "id"))
+					.when().get(EndPoints.GET_CUSTOMER)
+					.then()
+					.log()
+					.ifError()
+					.statusCode(404);
+
+		
+		} 
+		catch (Exception e) 
+		{
+			// TODO: handle exception
+			Report.log(Status.FAIL, "Failed Because of exception: " + e.getMessage());
+
+		}
+	}
+	
+	
+	@Test(description="Validate response time")
+	public void ValidateresponseTime()
+	{
+		try
+		{
+		    //Validate response time for API should be less than 1 second
+	         given()
+			.spec(RestUtilities.createPathParam(requestSpecification, customerId, "id"))
+			.when().get(EndPoints.GET_CUSTOMER)
+			.then()
+			.statusCode(200)
+			.time(lessThan(1L), TimeUnit.SECONDS)
+			.contentType(ContentType.JSON);
+		}
+		catch(Exception e)   
+		{
+			Report.log(Status.FAIL, "Failed Because of exception: " + e.getMessage());
+		}
+				
+	}
+	
+	
+	
 }
