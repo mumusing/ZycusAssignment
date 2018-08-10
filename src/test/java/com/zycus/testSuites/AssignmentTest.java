@@ -38,7 +38,7 @@ public class AssignmentTest extends BaseTest
 	  custmoerInfo.setAddress("pearl village hyd-tn");
 	  custmoerInfo.setWebsite("https://www.mysite.com");
 	  custmoerInfo.setLanguage("English");
-	  custmoerInfo.setEmail("abc.text");
+	  custmoerInfo.setEmail("test@test.com");
 	  
 	  //prepare requestSpecification for this test
 	  requestSpecification.basePath(Path.BASE_PATH_CREATE_CUSTOMER);//Here adding Base Path in request
@@ -73,23 +73,77 @@ public class AssignmentTest extends BaseTest
   {
 	  try 
 	  {
-		Response response =given()
+		Response response=given()
 		.spec(RestUtilities.createPathParam(requestSpecification, customerId, "id"))
 		.when()
 		.post(EndPoints.GET_CUSTOMER)
 		.then()
 		.statusCode(200)
 		.contentType(ContentType.JSON).and()
-		.body("status", equalTo("OK")).extract()
+		.body("status", equalTo("OK"))
+		.body("name", equalTo("mukesh"))
+		.body("email", equalTo("test@test.com"))
+		.body("phone_number", equalTo("1234567"))
+		.extract()
 		.response();
+		
+		
+		JsonPath jPath=RestUtilities.getJsonPath(response);
+		customerId=jPath.getString("ID");
+		Report.log(Status.PASS, "Customer details access successfully with ID: "+customerId); 
 		
 		
 	  } 
 	  catch (Exception e) {
 		// TODO: handle exception
+		  Report.log(Status.FAIL, "Test Failed because of exception: "+e.getMessage());
 	}
   }
   
+  @Test(description="This Test send bad request and validate status code 400")
+  public void Validate_For_400_Status_Code()
+  {
+	  try
+	  {
+		  
+	  
+	  //suppose name field is mandatory but in body we are not adding So that we will get Status code as 400
+	  CustomerModel custmoerInfo=new CustomerModel();
+//	  custmoerInfo.setName("Mukesh");
+//	  custmoerInfo.setPhone_number("1234567");
+//	  custmoerInfo.setAddress("pearl village hyd-tn");
+	  custmoerInfo.setWebsite("https://www.mysite.com");
+	  custmoerInfo.setLanguage("English");
+	  custmoerInfo.setEmail("test@test.com");
+	  
+	  requestSpecification.basePath(Path.BASE_PATH_CREATE_CUSTOMER);
+	  
+	         Response response=  given()
+			  .spec(requestSpecification)
+			  .body(custmoerInfo)
+			  .when()
+			  .post(EndPoints.CREATE_CUSTOMER)
+			  .then()
+			  .statusCode(400)
+			  .extract()
+			  .response();
+	           
+	         Report.log(Status.INFO, response.asString());
+	         JsonPath jPath=RestUtilities.getJsonPath(response);
+	         Report.log(Status.PASS,"Status code generated with: "+ jPath.getString("statusCode"));
+	  }
+	  catch (Exception e) {
+		// TODO: handle exception
+		  Report.log(Status.FAIL, "Failed Because of exception: "+e.getMessage());
+	}  
+  }
+  @Test(description="This Test send request with InValid Auth and validate status code 401")
+  public void Validate_401_Unauthorized()
+  {
+	  
+	  
+	  
+  }
   
   
   
