@@ -5,6 +5,7 @@ import io.restassured.specification.ResponseSpecification;
 
 public class BaseTest
 {
+//jhjjhgu
  protected static RequestSpecification requestSpecification;
  protected static ResponseSpecification responseSpecification;
 	public static void initialize(String testName,String testDescription) throws Exception
